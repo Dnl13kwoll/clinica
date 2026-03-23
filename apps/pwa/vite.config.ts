@@ -1,11 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
-    react(), tailwindcss(),
+    react(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
@@ -19,14 +18,11 @@ export default defineConfig({
           { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
         ]
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        runtimeCaching: [
-          { urlPattern: /\/api\/nutricao\/meu-plano/, handler: 'NetworkFirst', options: { cacheName: 'plano-cache' } }
-        ]
       }
     })
   ],
-  server: { port: 5174, proxy: { '/api': { target: 'http://localhost:3000', changeOrigin: true } } }
+  server: {
+    port: 5174,
+    proxy: { '/api': { target: 'http://localhost:3000', changeOrigin: true } }
+  }
 })
