@@ -20,11 +20,12 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 function Layout({ children }: { children: React.ReactNode }) {
   const { usuario, logout } = useAuth()
   const { temNutricao, temPersonal } = useModulos()
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="w-56 bg-white border-r border-gray-100 p-4 flex flex-col gap-1">
+      <aside className="w-56 bg-white border-r border-gray-100 p-4 flex flex-col gap-1 fixed h-full">
         <div className="text-lg font-semibold text-gray-900 px-3 py-2 mb-4">SalusMetrics</div>
-        <a href="/" className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Dashboard</a>
+        <a href="/"             className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Dashboard</a>
         {temNutricao && <>
           <a href="/pacientes"    className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Pacientes</a>
           <a href="/planos"       className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Planos alimentares</a>
@@ -34,33 +35,52 @@ function Layout({ children }: { children: React.ReactNode }) {
           <a href="/alunos"   className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Alunos</a>
           <a href="/treinos"  className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Treinos</a>
         </>}
-        <div className="mt-auto text-xs text-gray-400 px-3 py-2">{usuario?.nome}</div>
-        <button onClick={logout} className="px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-50 text-left">Sair</button>
+        <div className="mt-auto">
+          <div className="text-xs text-gray-400 px-3 py-2 truncate">{usuario?.nome}</div>
+          <button onClick={logout} className="w-full px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-50 text-left">Sair</button>
+        </div>
       </aside>
-      <main className="flex-1 p-8">{children}</main>
+      <main className="flex-1 ml-56 p-8">{children}</main>
     </div>
   )
 }
 
-const Spin = () => <div className="min-h-screen flex items-center justify-center"><div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" /></div>
+function PrivateLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <PrivateRoute>
+      <Layout>{children}</Layout>
+    </PrivateRoute>
+  )
+}
+
+const Spin = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+)
 
 export default function App() {
   const { temNutricao, temPersonal } = useModulos()
+
   return (
     <Suspense fallback={<Spin />}>
       <Routes>
         <Route path="/login"         element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
+
+        <Route path="/" element={<PrivateLayout><Dashboard /></PrivateLayout>} />
+
         {temNutricao && <>
-          <Route path="/pacientes"    element={<PrivateRoute><Layout><Pacientes /></Layout></PrivateRoute>} />
-          <Route path="/planos"       element={<PrivateRoute><Layout><PlanoAlimentar /></Layout></PrivateRoute>} />
-          <Route path="/agenda-nutri" element={<PrivateRoute><Layout><Agenda /></Layout></PrivateRoute>} />
+          <Route path="/pacientes"    element={<PrivateLayout><Pacientes /></PrivateLayout>} />
+          <Route path="/planos"       element={<PrivateLayout><PlanoAlimentar /></PrivateLayout>} />
+          <Route path="/agenda-nutri" element={<PrivateLayout><Agenda /></PrivateLayout>} />
         </>}
+
         {temPersonal && <>
-          <Route path="/alunos"   element={<PrivateRoute><Layout><Alunos /></Layout></PrivateRoute>} />
-          <Route path="/treinos"  element={<PrivateRoute><Layout><Treinos /></Layout></PrivateRoute>} />
+          <Route path="/alunos"   element={<PrivateLayout><Alunos /></PrivateLayout>} />
+          <Route path="/treinos"  element={<PrivateLayout><Treinos /></PrivateLayout>} />
         </>}
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
