@@ -1,16 +1,15 @@
 services:
-  api:
-    build: ./apps/api
-    container_name: nutriapp-api
+
+  nginx:
+    image: nginx:alpine
+    container_name: nutriapp-nginx
     restart: always
     ports:
-      - "3000:3000"
-    env_file: .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./apps/web/dist:/usr/share/nginx/web:ro
+      - ./apps/pwa/dist:/usr/share/nginx/pwa:ro
     networks:
       - nutriapp
 
@@ -19,7 +18,7 @@ services:
     container_name: nutriapp-db
     restart: always
     environment:
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_PASSWORD: "NutriApp2024"
       POSTGRES_DB: nutriapp
     ports:
       - "5432:5432"
@@ -41,21 +40,6 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    networks:
-      - nutriapp
-
-  nginx:
-    image: nginx:alpine
-    container_name: nutriapp-nginx
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./apps/web/dist:/usr/share/nginx/web:ro
-      - ./apps/pwa/dist:/usr/share/nginx/pwa:ro
-    depends_on:
-      - api
     networks:
       - nutriapp
 
